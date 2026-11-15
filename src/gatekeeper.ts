@@ -123,6 +123,16 @@ export function evaluateGatekeeper(
   return { decision: "APPROVE", reason_code: "ALL_CHECKS_PASSED", failedChecks };
 }
 
+import { createHash } from "node:crypto";
+
+const FIELD_PRIME = BigInt("2188824287183927522224640577328159286182216822726122852853824775429379122115");
+
+function toFieldElement(value: string): string {
+  if (/^(0x[0-9a-fA-F]+|[0-9]+)$/.test(value)) { return (BigInt(value) % FIELD_PRIME).toString(); }
+  const digest = createHash("sha256").update(value, "utf8").digest("hex");
+  return (BigInt(`0x${digest}`) % FIELD_PRIME).toString();
+}
+
 /**
  * Build the public inputs for the gatekeeper Groth16 circuit.
  *
@@ -138,8 +148,8 @@ export function buildCircuitInput(
   const input = task.input;
   return {
     // Public inputs — the platform re-verifies the proof against these.
-    registeredVk: input.registered_vk,
-    proofVk: input.proof_vk,
+    registeredVkHash: input.registered_vk,
+    proofVkHash: input.proof_vk,
     minimum: input.minimum,
     publicBalance: input.public_balance,
     expiryBlock: input.expiry_block,
@@ -150,5 +160,7 @@ export function buildCircuitInput(
     maxTransfer: input.max_transfer,
     // 1 = APPROVE, 0 = REJECT
     decision: decision === "APPROVE" ? "1" : "0",
+    taskId: toFieldElement(task.task_id),
+    salt: toFieldElement(`${task.task_id}:${input.proof_tx}`),
   };
 }
