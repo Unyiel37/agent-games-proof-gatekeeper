@@ -10,15 +10,31 @@
  */
 
 import * as snarkjs from "snarkjs";
+import { existsSync } from "node:fs";
+import { dirname, join, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 import { buildCircuitInput, type Decision, type GatekeeperTask } from "./gatekeeper.js";
+
+function resolveCircuitPath(envVar: string, fallback: string): string {
+  const fromEnv = process.env[envVar];
+  if (fromEnv) return fromEnv;
+  if (existsSync(resolve(fallback))) return fallback;
+  return join(dirname(fileURLToPath(import.meta.url)), "..", fallback);
+}
+
+const WASM_PATH = resolveCircuitPath(
+  "CIRCUIT_WASM_PATH",
+  "./circuits/gatekeeper.wasm",
+);
+const ZKEY_PATH = resolveCircuitPath(
+  "CIRCUIT_ZKEY_PATH",
+  "./circuits/gatekeeper_final.zkey",
+);
 
 export interface GeneratedProof {
   proof: unknown;
   publicSignals: string[];
 }
-
-const WASM_PATH = process.env.CIRCUIT_WASM_PATH ?? "./circuits/gatekeeper.wasm";
-const ZKEY_PATH = process.env.CIRCUIT_ZKEY_PATH ?? "./circuits/gatekeeper_final.zkey";
 
 /** Registered verification-key hash for the Proof Gatekeeper circuit. */
 export const REGISTERED_VK_HASH =
