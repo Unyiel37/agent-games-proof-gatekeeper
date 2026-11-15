@@ -1,0 +1,25 @@
+{
+  "name": "agent-games-proof-gatekeeper",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Proof Gatekeeper agent for zkVerify Agent Games — a verifiable AI agent endpoint (TypeScript, Groth16, snarkjs, zkVerify)",
+  "type": "module",
+  "main": "dist/server.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "dev": "tsx watch src/server.ts",
+    "test": "tsx src/test-harness.ts"
+  },
+  "dependencies": {
+    "snarkjs": "^0.7.5"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsx": "^4.0.0",
+    "typescript": "^5.6.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
